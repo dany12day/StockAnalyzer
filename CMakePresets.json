@@ -1,0 +1,32 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build/${presetName}",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+            }
+        },
+        {
+            "name": "linux-base",
+            "hidden": true,
+            "inherits": "base",
+            "description": "Desktop Linux. Requires CMAKE_PREFIX_PATH pointing at a Qt 6.11.2 gcc_64 tree; supply it from CMakeUserPresets.json."
+        },
+        {
+            "name": "android-base",
+            "hidden": true,
+            "inherits": "base",
+            "description": "Android arm64. Requires the Qt android toolchain file, QT_HOST_PATH, and the SDK/NDK roots; supply them from CMakeUserPresets.json.",
+            "cacheVariables": {
+                "ANDROID_ABI": "arm64-v8a",
+                "ANDROID_PLATFORM": "android-28",
+                "ANDROID_STL": "c++_shared"
+            }
+        }
+    ]
+}

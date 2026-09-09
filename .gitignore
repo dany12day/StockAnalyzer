@@ -3,6 +3,9 @@ build*/
 .cache/
 aqtinstall.log
 
+# Machine-specific CMake preset overrides (absolute Qt/SDK/NDK paths)
+CMakeUserPresets.json
+
 # Local tooling and assistant config — never committed
 CLAUDE.md
 COLLABORATION.md
