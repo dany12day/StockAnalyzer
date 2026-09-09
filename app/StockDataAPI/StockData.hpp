@@ -7,7 +7,8 @@
 
 QT_FORWARD_DECLARE_CLASS(QNetworkAccessManager)
 
-enum class ParseError{
+enum class ParseError
+{
     MalformedJson,
     UnexpectedShape,
     EmptyResult,

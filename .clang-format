@@ -1,0 +1,8 @@
+---
+BasedOnStyle:                     Microsoft
+
+AccessModifierOffset:             -4          # cancel the class indent, Qt-style flush
+AllowShortFunctionsOnASingleLine: Inline      # keep one-line Q_PROPERTY getters
+PackConstructorInitializers:      Never       # stop the initializer list collapsing
+BreakConstructorInitializers:     BeforeComma # leading-comma layout
+MaxEmptyLinesToKeep:              1           # remove empty lines
