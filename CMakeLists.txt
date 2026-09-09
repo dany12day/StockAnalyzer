@@ -29,7 +29,14 @@ endif()
 
 qt_add_executable(appValueApp
     main.cpp
-    app/StockDataAPI/StockData.cpp
+    infrastructure/StockData.cpp
+    # The header is listed deliberately. AUTOMOC discovers Q_OBJECT headers by
+    # looking for a same-named header beside each .cpp; now that headers live
+    # under infrastructure/include/ and sources under infrastructure/src/, that
+    # heuristic no longer finds it, and the moc-generated signal bodies silently
+    # vanish -- surfacing as "undefined reference to StockData::resultTextChanged()"
+    # at link time rather than as a clear error.
+    infrastructure/StockData.hpp
 )
 
 if (ANDROID)
@@ -40,7 +47,7 @@ qt_add_qml_module(appValueApp
     URI ValueApp
     VERSION 1.0
     QML_FILES
-        Main.qml
+        ui/Main.qml
 )
 
 set_target_properties(appValueApp PROPERTIES
@@ -65,7 +72,20 @@ install(TARGETS appValueApp
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 
-target_include_directories(appValueApp PRIVATE app/StockDataAPI)
+# ${CMAKE_CURRENT_SOURCE_DIR} lets application code write the self-documenting
+# form, #include <infrastructure/StockData.hpp>.
+#
+# infrastructure/ must ALSO be on the path, and for a non-obvious reason:
+# qmltyperegistrar generates the QML registration unit from the basename moc
+# records in the metatypes JSON, and guards it as
+#     #if __has_include(<StockData.hpp>)
+# If that basename does not resolve, the include is skipped with no diagnostic
+# and the build fails later with "'StockData' was not declared in this scope".
+# Removing this line reproduces that.
+target_include_directories(appValueApp
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}
+    PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/infrastructure
+)
 
 # Tests (CLAUDE.md 4.1). Catch2 for the domain layer, which links zero Qt.
 #

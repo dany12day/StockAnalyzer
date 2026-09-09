@@ -1,7 +1,7 @@
 #include <QGuiApplication>
 #include <QQmlApplicationEngine>
 
-#include "app/StockDataAPI/StockData.hpp"
+#include <infrastructure/StockData.hpp>
 
 int main(int argc, char *argv[])
 {
