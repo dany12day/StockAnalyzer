@@ -1,4 +1,4 @@
-#include <infrastructure/StockData.hpp>
+#include "StockData.hpp"
 
 #include <QByteArray>
 #include <QDebug>
