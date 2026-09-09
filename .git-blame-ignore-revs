@@ -1,0 +1,9 @@
+# Revisions to skip in git blame. Formatting-only commits belong here so
+# that blame points at the commit that wrote a line, not the one that
+# re-wrapped it.
+#
+# Locally:  git config blame.ignoreRevsFile .git-blame-ignore-revs
+# GitHub reads this file automatically.
+
+# style: add clang-format config and format the C++ sources
+11980b14a93a8ee8459fdb8815d466e1b896109d
