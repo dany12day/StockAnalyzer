@@ -13,6 +13,11 @@ find_package(Qt6 6.11.2 EXACT REQUIRED COMPONENTS Quick Network)
 
 qt_standard_project_setup(REQUIRES 6.11.2)
 
+# The domain layer. Declared before the app target that links it.
+# It links no Qt at all -- see domain/CMakeLists.txt for why that is the
+# enforcement mechanism for A2 rather than a convention.
+add_subdirectory(domain)
+
 if (ANDROID)
     include(FetchContent)
     FetchContent_Declare(android_openssl
@@ -48,6 +53,7 @@ set_target_properties(appValueApp PROPERTIES
 target_link_libraries(appValueApp
     PRIVATE Qt6::Quick
     PRIVATE Qt6::Network
+    PRIVATE domain
 )
 
 target_compile_options(appValueApp PRIVATE -Wall -Wextra -Wpedantic -Werror)
@@ -60,3 +66,17 @@ install(TARGETS appValueApp
 )
 
 target_include_directories(appValueApp PRIVATE app/StockDataAPI)
+
+# Tests (CLAUDE.md 4.1). Catch2 for the domain layer, which links zero Qt.
+#
+# enable_testing() must be called at top level or ctest finds nothing.
+#
+# Never built for Android: cross-compiling Catch2 for arm64 is slow and the
+# resulting binary cannot be run by the desktop test harness anyway. CI
+# runs the suite in the Linux job.
+option(BUILD_TESTING "Build the domain test suite" ON)
+
+if (BUILD_TESTING AND NOT ANDROID)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
