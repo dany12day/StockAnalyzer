@@ -1,4 +1,7 @@
-cmake_minimum_required(VERSION 3.16)
+# 3.21 is the floor required by CMakePresets.json schema version 3, which is
+# the documented way to configure this project. Qt 6.11 itself declares
+# 3.16...3.21, so this sits at the top of Qt's own supported range.
+cmake_minimum_required(VERSION 3.21)
 
 project(ValueApp VERSION 0.1 LANGUAGES CXX)
 
