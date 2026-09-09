@@ -1,0 +1,93 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# A newer push to the same branch makes an in-flight run obsolete.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  format:
+    name: clang-format
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Pinned to the exact version used locally. ubuntu-24.04 ships
+      # clang-format 18, and formatting differs between major versions, so an
+      # unpinned binary would reject code that is clean on a developer machine
+      # -- and there is no way to satisfy both at once.
+      - name: Install pinned clang-format
+        run: pip install "clang-format==22.1.8"
+
+      # A malformed .clang-format does not fail loudly: clang-format falls back
+      # to defaults. Parse it explicitly first so a broken config is reported
+      # as a config error rather than as hundreds of formatting diffs.
+      - name: Validate .clang-format
+        run: clang-format --style=file --dump-config > /dev/null
+
+      # Driven off the tracked file list, never a recursive glob: that excludes
+      # build/ and its generated *_autogen, .rcc and qmltyperegistrations
+      # sources for free.
+      - name: Check formatting
+        run: |
+          git ls-files '*.cpp' '*.hpp' '*.tpp' \
+            | xargs -r clang-format --style=file --dry-run --Werror
+
+  linux:
+    name: Linux (Debug)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            ninja-build libgl1-mesa-dev libxkbcommon-dev
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: "6.11.2"
+          host: linux
+          target: desktop
+          arch: linux_gcc_64
+          cache: true
+
+      # install-qt-action exports QT_ROOT_DIR, which the ci-linux preset reads
+      # as CMAKE_PREFIX_PATH. Assert it before configuring: if the action ever
+      # changes that variable, this fails with a clear message instead of a
+      # find_package error forty lines deep.
+      - name: Verify Qt location
+        run: |
+          echo "QT_ROOT_DIR=$QT_ROOT_DIR"
+          if [ ! -d "$QT_ROOT_DIR/lib/cmake/Qt6" ]; then
+            echo "::error::Qt6 CMake package not found under QT_ROOT_DIR"
+            ls -la "$QT_ROOT_DIR" || true
+            exit 1
+          fi
+
+      - name: Configure
+        run: cmake --preset ci-linux
+
+      - name: Build
+        run: cmake --build --preset ci-linux
+
+      # Only domain_tests runs here. It links no Qt, so this needs no display.
+      - name: Test
+        run: ctest --preset ci-linux
+
+# Android CI is scheduled for M2 (CLAUDE.md section 10), not M0. Until it
+# exists, domain/src/ToolchainProbe.cpp is enforced only by local Android
+# builds -- `cmake --build --preset android-debug`. Run it before relying on
+# any C++23 library feature.

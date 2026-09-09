@@ -16,7 +16,6 @@
 StockData::StockData(QObject *parent)
     : QObject(parent)
     , m_manager(new QNetworkAccessManager(this))
-
 {
     m_manager->setTransferTimeout(5000); // Set timeout to 5 seconds
 }

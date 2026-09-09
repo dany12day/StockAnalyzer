@@ -1,0 +1,36 @@
+Copyright (c) 2026 Ghere Daniel. All rights reserved.
+
+This repository is a personal project and is not, at this time, released
+under an open-source licence. No permission is granted to copy, modify,
+distribute, or create derivative works from this software except as
+expressly permitted in writing by the copyright holder.
+
+
+WHY THIS IS DELIBERATE
+
+Withholding a licence keeps every option open while the project is private
+(CLAUDE.md section 4.2, decision D2). As sole copyright holder, the author
+can relicense this code under any terms later -- permissive, copyleft, or
+commercial. Publishing under an open-source licence first is a one-way
+door for any contribution that is not the author's own, which is why D2
+also records that external pull requests are not accepted without a CLA.
+
+Revisit this file when the repository goes public, which D2 schedules for
+after M4.
+
+
+THIRD-PARTY COMPONENTS
+
+This software links the Qt framework, used under the GNU Lesser General
+Public License version 3 (LGPLv3). Only LGPL-available Qt modules are used;
+GPL-only modules such as QtCharts and QtDataVisualization are excluded by
+design (CLAUDE.md constraint L1), which is why charts here are hand-built.
+
+Qt is linked dynamically and is not modified. LGPLv3 obligations -- shipping
+the licence text, naming the linked Qt version, and allowing a recipient to
+relink against their own build of Qt -- attach to distributed binaries, not
+to this source repository. They must be satisfied before any release
+artifact (AppImage, APK) is published.
+
+The test suite uses Catch2, under the Boost Software License 1.0. It is a
+build-time dependency only and is not distributed with the application.

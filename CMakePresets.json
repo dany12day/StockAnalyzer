@@ -27,6 +27,15 @@
                 "ANDROID_PLATFORM": "android-28",
                 "ANDROID_STL": "c++_shared"
             }
+        },
+        {
+            "name": "ci-linux",
+            "displayName": "CI: Linux",
+            "description": "Used by .github/workflows/ci.yml. Reads QT_ROOT_DIR from the environment, which the workflow sets to the Qt install it just provisioned. Kept in the tracked file because CMakeUserPresets.json is gitignored, so a fresh clone has no invocable preset otherwise.",
+            "inherits": "linux-base",
+            "cacheVariables": {
+                "CMAKE_PREFIX_PATH": "$env{QT_ROOT_DIR}"
+            }
         }
     ],
     "testPresets": [
@@ -41,6 +50,17 @@
                 "noTestsAction": "error",
                 "stopOnFailure": false
             }
+        },
+        {
+            "name": "ci-linux",
+            "inherits": "test-base",
+            "configurePreset": "ci-linux"
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "ci-linux",
+            "configurePreset": "ci-linux"
         }
     ]
 }
