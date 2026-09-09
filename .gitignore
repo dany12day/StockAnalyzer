@@ -1,1 +1,12 @@
-build
+# Build output
+build*/
+.cache/
+aqtinstall.log
+
+# Local tooling and assistant config — never committed
+CLAUDE.md
+COLLABORATION.md
+.claude/
+
+# Scratch experiments, not part of the build
+leak.cpp
