@@ -1,12 +1,17 @@
 import QtQuick
 import QtQuick.Controls
 import QtQuick.Layouts
+import ValueApp
 
 ApplicationWindow {
     width: 640
     height: 480
     visible: true
     title: qsTr("Hello World")
+
+    StockData {
+        id: stockData
+    }
 
     ColumnLayout {
         anchors.fill: parent
@@ -20,14 +25,14 @@ ApplicationWindow {
             Button {
                 text: "Search"
                 onClicked: {
-                    result.text = tickerField.text
+                    stockData.fetch(tickerField.text)
                 }
             }
         }
 
         Label {
             id: result
-            text: "Label"
+            text: stockData.resultText
         }
     }
 
