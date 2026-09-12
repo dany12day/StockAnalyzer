@@ -10,7 +10,6 @@ public:
     ~DcfViewModel();
 
 private:
-
 };
 
 #endif
