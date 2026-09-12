@@ -9,34 +9,27 @@ ApplicationWindow {
     visible: true
     title: qsTr("Hello World")
 
-    StockData {
-        id: stockData
+    id: mainWindow
+    property var destinations: ["DCF", "Fundamentals"]
+
+    AppDrawer {
+        id: appDrawer
+        model: mainWindow.destinations
     }
 
-    ColumnLayout {
+    header: ToolBar {
+        ToolButton {
+            text: "\u2630"
+            onClicked: appDrawer.open()
+        }
+    }
+
+    StackLayout {
         anchors.fill: parent
+        currentIndex: appDrawer.currentIndex
 
-        RowLayout {
-            TextField {
-                id: tickerField
-                placeholderText: qsTr("Enter stock ticker")
-            }
-
-            Button {
-                text: "Search"
-                onClicked: {
-                    stockData.fetch(tickerField.text)
-                }
-            }
-        }
-
-        Label {
-            id: result
-            text: stockData.resultText
-        }
+        DcfPage { }
+        FundamentalsPage { }
     }
-
-    
-
     
 }

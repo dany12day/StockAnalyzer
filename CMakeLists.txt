@@ -48,6 +48,9 @@ qt_add_qml_module(appValueApp
     VERSION 1.0
     QML_FILES
         app/qml/Main.qml
+        app/qml/AppDrawer.qml
+        app/qml/DcfPage.qml
+        app/qml/FundamentalsPage.qml
 )
 
 set_target_properties(appValueApp PROPERTIES
