@@ -94,5 +94,7 @@ option(BUILD_TESTING "Build the domain test suite" ON)
 
 if (BUILD_TESTING AND NOT ANDROID)
     enable_testing()
-    add_subdirectory(tests)
+    # Tests live beside the layer they test. Added from here rather than from
+    # domain/CMakeLists.txt so the ANDROID guard above still covers them.
+    add_subdirectory(domain/tests)
 endif()
