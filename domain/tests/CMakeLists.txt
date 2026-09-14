@@ -17,6 +17,7 @@ FetchContent_MakeAvailable(Catch2)
 
 add_executable(domain_tests
     ToolchainProbeTest.cpp
+    SymbolTest.cpp
 )
 
 # Catch2::Catch2WithMain supplies main(). Catch2 v3 is a compiled library,

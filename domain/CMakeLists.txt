@@ -14,6 +14,7 @@
 
 add_library(domain STATIC
     src/ToolchainProbe.cpp
+    src/Symbol.cpp
 )
 
 # PUBLIC: consumers (the app, the tests) need these headers too.
