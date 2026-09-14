@@ -4,22 +4,28 @@ import QtQuick.Controls
 
 Item
 {
-    StockData {
+    StockData
+    {
         id: stockData
     }
 
-    ColumnLayout {
+    ColumnLayout
+    {
         anchors.fill: parent
 
-        RowLayout {
-            TextField {
+        RowLayout
+        {
+            TextField
+            {
                 id: tickerField
                 placeholderText: qsTr("Enter stock ticker")
             }
 
-            Button {
+            Button
+            {
                 text: "Search"
-                onClicked: {
+                onClicked:
+                {
                     stockData.fetch(tickerField.text)
                 }
             }
