@@ -14,6 +14,7 @@
 
 add_library(domain STATIC
     src/ToolchainProbe.cpp
+    src/Quote.cpp
     src/Symbol.cpp
 )
 
