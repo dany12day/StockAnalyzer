@@ -15,9 +15,13 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(Catch2)
 
+# StringMakers.hpp is header-only and deliberately not listed: it is included
+# by the tests that need it, not compiled on its own.
 add_executable(domain_tests
     ToolchainProbeTest.cpp
     SymbolTest.cpp
+    CurrencyTest.cpp
+    MoneyTest.cpp
 )
 
 # Catch2::Catch2WithMain supplies main(). Catch2 v3 is a compiled library,
