@@ -45,8 +45,9 @@ enum class MoneyError
 
 /// A monetary amount: a fixed-point quantity paired with its currency.
 ///
-/// The amount is stored as an integer of #scaledFactor-ths of a currency unit
-/// - so USD 12.50 is held as 12500000, not as 12.5. Floating point is not
+/// The amount is stored as an integer count of fractional units, #scaledFactor
+/// of them to one currency unit - so USD 12.50 is held as 12500000, not as
+/// 12.5. Floating point is not
 /// used for storage or arithmetic, and the reasons are concrete rather than
 /// conventional:
 ///  - decimal fractions have no exact binary representation, so `0.1 + 0.2`
@@ -141,7 +142,7 @@ public:
     /// The currency this amount is denominated in.
     [[nodiscard]] Currency getCurrency() const noexcept { return m_currency; }
 
-    /// The raw stored amount, in #scaledFactor-ths of a currency unit.
+    /// The raw stored amount: #scaledFactor of these make one currency unit.
     ///
     /// Named for what it is: this is 10^#scale times the currency amount, and
     /// reading it as units is wrong by a factor of a million.

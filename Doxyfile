@@ -1,0 +1,88 @@
+# Doxygen configuration for ValueApp (CLAUDE.md section 3).
+#
+# Only settings that differ from Doxygen's defaults are listed, so this file
+# stays readable as a set of decisions rather than a dump of every option.
+# Regenerate the annotated full version with `doxygen -g` if you need the
+# reference.
+#
+# Run from the repository root:
+#     doxygen Doxyfile
+# Output lands in docs/html/index.html.
+
+PROJECT_NAME           = "ValueApp"
+PROJECT_BRIEF          = "Company and portfolio analysis through owner earnings"
+OUTPUT_DIRECTORY       = docs
+HTML_OUTPUT            = html
+
+# --- What gets documented -------------------------------------------------
+#
+# `domain` only, deliberately. It is the layer whose headers carry complete
+# comments (COLLABORATION.md assigns header Doxygen to Claude), and the layer
+# whose correctness the project actually depends on. Pointing this at `app/`
+# today would bury the domain API in warnings from M0 code that has not been
+# documented yet -- revisit when `infrastructure/` is extracted at M1.
+INPUT                  = domain/include
+RECURSIVE              = YES
+FILE_PATTERNS          = *.hpp *.tpp
+
+# Build trees are never documentation input. This is not hypothetical: a
+# stray `cmake` run from inside domain/include left a full build directory --
+# Catch2 checkout included -- under domain/include/domain/build, and its 188
+# headers landed in the first generated run as `unrelated::ADL_size` and
+# friends. `build*/` is gitignored, so such a directory is invisible to
+# `git status` and can sit there indefinitely.
+EXCLUDE_PATTERNS       = */build/* \
+                         */build-*/* \
+                         */_deps/*
+
+# Implementation files are not an input. Per COLLABORATION.md the Doxygen
+# lives in headers; comments in .cpp files explain *how*, not *what*, and are
+# for the reader of that file.
+
+# --- Extraction -----------------------------------------------------------
+#
+# EXTRACT_ALL stays NO on purpose. With it on, undocumented entities are
+# silently published with empty bodies and WARN_IF_UNDOCUMENTED has nothing
+# to report. Off, an undocumented public member is a warning -- which is the
+# point of generating this at all, since \param names and # references are
+# otherwise unverified markup that nothing checks.
+EXTRACT_ALL            = NO
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = YES
+
+# The comments are written with the first sentence as the summary.
+JAVADOC_AUTOBRIEF      = YES
+QT_AUTOBRIEF           = YES
+
+# --- Warnings -------------------------------------------------------------
+WARN_IF_UNDOCUMENTED   = YES
+WARN_IF_DOC_ERROR      = YES
+WARN_NO_PARAMDOC       = NO
+WARN_AS_ERROR          = NO
+
+# --- Preprocessing --------------------------------------------------------
+#
+# int128.hpp declares `__extension__ typedef __int128 int128_t;`. Doxygen's
+# parser is not GCC and does not know `__extension__`, so it is defined away
+# here; without this the typedef is misparsed and every Money member that
+# mentions int128_t loses its type. See int128.hpp for why the keyword is
+# load-bearing in the actual build.
+ENABLE_PREPROCESSING   = YES
+MACRO_EXPANSION        = YES
+EXPAND_ONLY_PREDEF     = YES
+PREDEFINED             = __extension__= \
+                         __int128=long \
+                         "[[nodiscard]]="
+
+# --- Output ---------------------------------------------------------------
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+GENERATE_TREEVIEW      = YES
+DISABLE_INDEX          = NO
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = NO
+ALPHABETICAL_INDEX     = YES
+
+# Graphviz is not assumed to be installed; the class graphs are a nicety and
+# their absence must not turn a docs build into a failure.
+HAVE_DOT               = NO
