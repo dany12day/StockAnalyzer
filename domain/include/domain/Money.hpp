@@ -5,7 +5,9 @@
 #include <cmath>
 #include <cstdint>
 #include <expected>
+#include <initializer_list>
 #include <limits>
+#include <span>
 
 namespace domain
 {
@@ -171,6 +173,103 @@ public:
     ///
     /// \return The ordering, or MoneyError::CurrencyMismatch.
     [[nodiscard]] std::expected<std::strong_ordering, MoneyError> compare(const Money &other) const noexcept;
+
+    /// Adds `other` to this amount, which must share its currency.
+    ///
+    /// The currency check runs first and is absolute. There is deliberately no
+    /// rate parameter: a converting addition would round one operand and not
+    /// the other, so the result would depend on which side the call was made
+    /// from. Callers convert into a single reporting currency first, with an
+    /// explicit rate and as-of date (CLAUDE.md 6.4).
+    ///
+    /// Overflow is not reported, and cannot meaningfully occur. At #scale an
+    /// int128_t reaches roughly 1.7e32 currency units - some eighteen orders
+    /// of magnitude beyond world GDP - so the sum of two representable amounts
+    /// is itself representable in every case this application can encounter.
+    /// That is the whole point of the 128-bit storage decision (CLAUDE.md D8),
+    /// and it is why MoneyError::Overflow belongs to #fromDouble alone.
+    ///
+    /// \param other Amount to add. Must carry the same Currency as this one.
+    /// \return The sum, or MoneyError::CurrencyMismatch.
+    [[nodiscard]] std::expected<Money, MoneyError> add(const Money &other) const noexcept;
+
+    /// Subtracts `other` from this amount, which must share its currency.
+    ///
+    /// The currency rule and the absence of an overflow error are exactly as
+    /// described on #add, for the same reasons.
+    ///
+    /// A negative result is returned unchanged and is never clamped to zero.
+    /// Negative owner earnings is a real, meaningful figure about a real
+    /// business, and hiding it would defeat the purpose of computing it
+    /// (CLAUDE.md 6.4).
+    ///
+    /// \param other Amount to subtract. Must carry the same Currency as this one.
+    /// \return The difference, or MoneyError::CurrencyMismatch.
+    [[nodiscard]] std::expected<Money, MoneyError> subtract(const Money &other) const noexcept;
+
+    /// The same amount with its sign flipped, in the same currency.
+    ///
+    /// Returns a plain Money rather than `std::expected`. There is no second
+    /// operand here, so there is no currency to disagree with and nothing that
+    /// can fail; per A7 a function that cannot fail says so by not returning
+    /// `expected`. Obtaining negation from #subtract instead would hand every
+    /// caller an error that is unreachable by construction.
+    ///
+    /// That return type is also what lets negation compose with #sum. An
+    /// `expected` cannot sit in a braced list, so `sum({income, capex.negate()})`
+    /// compiles only because this yields a Money. Subtractive terms of an
+    /// owner-earnings expression enter the sum this way (CLAUDE.md 6.1).
+    ///
+    /// \warning Negating the smallest representable amount is undefined. The
+    ///          two's-complement range of int128_t is asymmetric, so that
+    ///          value has no positive counterpart. It sits near -1.7e32
+    ///          currency units and is unreachable from any real figure, but it
+    ///          is the one input this function cannot honour.
+    /// \return This amount negated.
+    [[nodiscard]] Money negate() const noexcept;
+
+    /// Adds every element of `others` to this amount.
+    ///
+    /// This amount is the first term *and* the currency authority: the result
+    /// carries this Currency, every element must match it, and summing an
+    /// empty range returns `*this` rather than an error. Being a member is
+    /// what makes that well-defined - a free function would need a separate
+    /// reporting currency to say what the sum of nothing is.
+    ///
+    /// Exists because owner earnings is a five-term expression (CLAUDE.md 6.1)
+    /// and chaining #add through `std::expected` nests it four deep. A single
+    /// call reads the way the definition is written. Subtractive terms enter
+    /// through #negate.
+    ///
+    /// The first mismatching element ends the traversal and later elements are
+    /// not examined. This is why the implementation is a loop rather than a
+    /// fold: neither `std::accumulate` nor `std::ranges::fold_left` can
+    /// short-circuit, so either would have to traverse the whole range or make
+    /// two passes over it.
+    ///
+    /// \param others Contiguous sequence of amounts, all in this Currency. A
+    ///               std::vector, std::array, C array or subspan binds without
+    ///               copying or allocating. For a braced list, see the
+    ///               overload taking `std::initializer_list`.
+    /// \return The total, or MoneyError::CurrencyMismatch.
+    [[nodiscard]] std::expected<Money, MoneyError> sum(std::span<const Money> others) const noexcept;
+
+    /// Adds every element of a braced list to this amount.
+    ///
+    /// A convenience over the `std::span` overload, which holds the logic and
+    /// documents the semantics. It exists because a `std::span` cannot be
+    /// constructed from a braced list - verified to fail on this toolchain
+    /// under both `-std=c++23` and `-std=c++26` - so `sum({a, b, c})` needs an
+    /// overload of its own. The two accept disjoint argument forms, so no call
+    /// between them is ambiguous, including `sum({})`.
+    ///
+    /// The elements live in an array the compiler materialises with automatic
+    /// storage duration, alive for the whole call, so this allocates nothing
+    /// and copies nothing.
+    ///
+    /// \param others Amounts to add, all in this Currency.
+    /// \return The total, or MoneyError::CurrencyMismatch.
+    [[nodiscard]] std::expected<Money, MoneyError> sum(std::initializer_list<Money> others) const noexcept;
 
 private:
     /// Total: any integer paired with a valid Currency is a valid Money.
